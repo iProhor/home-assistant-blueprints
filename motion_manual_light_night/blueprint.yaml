@@ -1,0 +1,99 @@
+blueprint:
+  name: Motion or Manual Light Control at Night with Resettable Timeout
+  description: >
+    💡 Turn on light on motion (at night only) or manually.
+    Automatically turn off light after a timeout, but only if motion stops and stays off.
+    Timeout resets on each new motion detection.
+  domain: automation
+  input:
+    motion_sensor:
+      name: Motion Sensor
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    light_target:
+      name: Light
+      selector:
+        target:
+          entity:
+            domain: light
+    light_entity:
+      name: Light Entity (for tracking state)
+      description: This must be the actual light entity (not just a target group or area).
+      selector:
+        entity:
+          domain: light
+    no_motion_wait:
+      name: Wait time before turning off
+      description: Time to wait after no motion before turning off the light
+      default: 120
+      selector:
+        number:
+          min: 5
+          max: 3600
+          unit_of_measurement: seconds
+          mode: slider
+
+trigger:
+  - platform: state
+    entity_id: !input motion_sensor
+    from: "off"
+    to: "on"
+    id: motion_on
+
+  - platform: state
+    entity_id: !input light_entity
+    from: "off"
+    to: "on"
+    id: manual_on
+
+  - platform: state
+    entity_id: !input motion_sensor
+    from: "on"
+    to: "off"
+    id: motion_off
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: motion_on
+          - condition: sun
+            after: sunset
+            before: sunrise
+        sequence:
+          - service: light.turn_on
+            target: !input light_target
+
+      - conditions:
+          - condition: trigger
+            id: manual_on
+        sequence: []
+
+  - repeat:
+      while:
+        - condition: state
+          entity_id: !input light_entity
+          state: "on"
+      sequence:
+        - wait_for_trigger:
+            - platform: state
+              entity_id: !input motion_sensor
+              to: "off"
+        - wait_for_trigger:
+            - platform: state
+              entity_id: !input motion_sensor
+              to: "on"
+              timeout:
+                seconds: !input no_motion_wait
+        - condition: template
+          value_template: "{{ wait.trigger is none }}"
+        - service: light.turn_off
+          target: !input light_target
+        - stop: Done
+          error: false
+
+mode: restart
