@@ -5,6 +5,7 @@ blueprint:
     Automatically turn off light after a timeout, but only if motion stops and stays off.
     Timeout resets on each new motion detection.
   domain: automation
+  version: "1.0.1"  
   input:
     motion_sensor:
       name: Motion Sensor
