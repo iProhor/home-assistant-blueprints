@@ -23,7 +23,7 @@ Timeout is **reset** on each new motion event.
 1. Go to **Home Assistant → Settings → Automations & Scenes → Blueprints**
 2. Click **Import Blueprint**, paste the raw URL of `blueprint.yaml`:
    ```
-   https://raw.githubusercontent.com/your-user/home-assistant-blueprints/main/motion_manual_light_night/blueprint.yaml
+   https://raw.githubusercontent.com/iProhor/home-assistant-blueprints/refs/heads/main/motion_manual_light_night/blueprint.yaml
    ```
 3. Click “Import Blueprint”
 4. Create a new automation based on it and set the motion sensor, light entity, and timeout.
