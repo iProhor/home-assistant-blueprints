@@ -87,8 +87,7 @@ action:
             - platform: state
               entity_id: !input motion_sensor
               to: "on"
-              timeout:
-                seconds: !input no_motion_wait
+          timeout: !input no_motion_wait
         - condition: template
           value_template: "{{ wait.trigger is none }}"
         - service: light.turn_off
