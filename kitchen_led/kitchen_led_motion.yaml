@@ -1,0 +1,76 @@
+blueprint:
+  name: Kitchen LED Motion + Light Level
+  description: |
+    Вмикає кухонне підсвічування, коли є рух і низький рівень освітлення.
+    Вимикає світло, коли рух припиняється і проходить затримка.
+  domain: automation
+  input:
+    motion_sensors:
+      name: Motion Sensors
+      description: Датчики руху (occupancy)
+      selector:
+        entity:
+          multiple: true
+          domain: binary_sensor
+          device_class: motion
+    illuminance_sensor:
+      name: Illuminance Sensor
+      description: Датчик освітленості (lux)
+      selector:
+        entity:
+          domain: sensor
+          device_class: illuminance
+    illuminance_threshold:
+      name: Illuminance Threshold
+      description: Порогове значення освітленості нижче якого світло буде вмикатись
+      default: 150
+      selector:
+        number:
+          min: 1
+          max: 1000
+          unit_of_measurement: lux
+          mode: slider
+    target_light:
+      name: LED Light
+      description: Освітлення для увімкнення/вимкнення
+      selector:
+        entity:
+          domain: light
+    delay_off:
+      name: Затримка вимкнення
+      description: Час очікування після припинення руху перед вимкненням світла
+      default: 180
+      selector:
+        number:
+          min: 10
+          max: 1800
+          unit_of_measurement: seconds
+          mode: slider
+
+trigger:
+  - platform: state
+    entity_id: !input motion_sensors
+    to: "on"
+
+condition:
+  - condition: numeric_state
+    entity_id: !input illuminance_sensor
+    below: !input illuminance_threshold
+
+action:
+  - service: light.turn_on
+    target:
+      entity_id: !input target_light
+
+  - wait_for_trigger:
+      - platform: state
+        entity_id: !input motion_sensors
+        to: "off"
+        for:
+          seconds: !input delay_off
+
+  - service: light.turn_off
+    target:
+      entity_id: !input target_light
+
+mode: restart
