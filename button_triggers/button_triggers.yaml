@@ -1,0 +1,59 @@
+blueprint:
+  name: ZHA Button - Single/Double Press Light Toggle
+  description: >-
+    Control two different lights using single and double presses of a ZHA button.
+    Requires the ZHA integration and a ZHA-compatible button.
+  domain: automation
+  input:
+    button_device:
+      name: Zigbee Button
+      description: Select the ZHA button device that will trigger the automation.
+      selector:
+        device:
+          integration: zha
+    light_single_press:
+      name: Light (Single Press)
+      description: Select the light entity to toggle with a single press.
+      selector:
+        entity:
+          domain: light
+    light_double_press:
+      name: Light (Double Press)
+      description: Select the light entity to toggle with a double press.
+      selector:
+        entity:
+          domain: light
+
+source_url: https://github.com/iProhor/home-assistant-blueprints/button_triggers/button_triggers.yaml
+
+trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_ieee: !input button_device # This will be populated by the device selector
+    # We need to get the device_ieee from the selected device.
+    # The blueprint will automatically use the IEEE address of the selected device.
+
+actions:
+  - choose:
+      # Action for single press
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ trigger.event.data.command == 'remote_button_short_press' and
+                trigger.event.data.endpoint_id == 1 }}
+        sequence:
+          - service: light.toggle
+            target:
+              entity_id: !input light_single_press
+      # Action for double press
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ trigger.event.data.command == 'remote_button_double_press' and
+                trigger.event.data.endpoint_id == 1 }}
+        sequence:
+          - service: light.toggle
+            target:
+              entity_id: !input light_double_press
+mode: single
