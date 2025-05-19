@@ -1,6 +1,5 @@
 blueprint:
   name: ZHA Button - Single/Double Press Light Toggle
-  source_url: https://github.com/iProhor/home-assistant-blueprints/button_triggers/button_triggers.yaml
   description: >-
     Control two different lights using single and double presses of a ZHA button.
     Requires the ZHA integration and a ZHA-compatible button.
