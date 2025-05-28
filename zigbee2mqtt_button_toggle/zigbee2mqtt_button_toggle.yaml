@@ -1,0 +1,49 @@
+blueprint:
+  name: Zigbee2MQTT Button Single/Double Press Toggle
+  description: >
+    Перемикає дві різні сутності (light or switch) за
+    одинарним  подвійним кліком Zigbee2MQTT-кнопки.
+  domain: automation
+  input:
+    mqtt_action_topic:
+      name: MQTT-топік "…/action"
+      description: >
+        Повний топік, in який кнопка публікує 'single' та 'double'
+        (наприклад: zigbee2mqtt/btn_kitchen/action).
+      selector:
+        text:
+
+    target_single_press:
+      name: Сутність (одинарний клік)
+      selector:
+        entity:
+          domain:
+            - light
+            - switch
+
+    target_double_press:
+      name: Сутність (подвійний клік)
+      selector:
+        entity:
+          domain:
+            - light
+            - switch
+
+trigger:
+  - platform: mqtt
+    topic: !input mqtt_action_topic
+
+action:
+  - choose:
+      - conditions: "{{ trigger.payload == 'single' }}"
+        sequence:
+          - service: homeassistant.toggle
+            target:
+              entity_id: !input target_single_press
+
+      - conditions: "{{ trigger.payload == 'double' }}"
+        sequence:
+          - service: homeassistant.toggle
+            target:
+              entity_id: !input target_double_press
+mode: single
