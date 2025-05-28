@@ -35,7 +35,9 @@ blueprint:
       description: Освітлення для увімкнення/вимкнення
       selector:
         entity:
-          domain: light
+          domain:
+            - light
+            - switch
     delay_off:
       name: Затримка вимкнення
       description: Час очікування після припинення руху перед вимкненням світла
