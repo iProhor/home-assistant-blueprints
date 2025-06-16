@@ -10,9 +10,12 @@ blueprint:
       description: Датчики руху (occupancy)
       selector:
         entity:
-          multiple: true
-          domain: binary_sensor
-          device_class: motion
+          multiple: true        
+          filter:
+            - device_class: occupancy
+              domain: binary_sensor
+            - device_class: motion
+              domain: binary_sensor
     illuminance_sensor:
       name: Illuminance Sensor
       description: Датчик освітленості (lux)
